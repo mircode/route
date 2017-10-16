@@ -11,7 +11,7 @@
 ### 二、监听URL变化
 ```javascript
 $.rule('page/**',function(url,param){
-  	  $('#container').load(url);
+  $('#container').load(url);
 });
  ```
  
