@@ -2,7 +2,7 @@
  * 轻量级路由插件
  * 
  * 监听URL变化
- * $.rule('page/**',function(url,param){
+ * $.listen('page/**',function(url,params){
  * 	  $('#container').load(url);
  * });
  * 
@@ -12,9 +12,9 @@
  * 请求页面片段并触发URL变化
  * $('#container').loadPage(url); 
  * 
- * 作者: 魏国兴
+ * auther: weiguoxing
  */
-;(function($){
+!function($){
 	
 	var Router={
 		routes:{},
@@ -45,28 +45,33 @@
 	        }
 	        return this;
 	    },
-	    param:function(param){
+	    params:function(params){
 	    	var url=this.location();
-			if(param){
-	    		var q='?';
-	    		for(var k in param){
-	    			var v=param[k];
-	    			if(v){
+			if(params){
+	    		var q='';
+	    		for(var k in params){
+	    			var v=params[k];
+	    			if(k&&v){
 	    			   q+=k+'='+v+'&';
 	    			}
 	    		}
-	    		this.searchchange=true;
-	    		url=url.path+q.replace(/&$/g,'')
+	    		if(q){
+	    			url=url.path+'?'+q.replace(/&$/g,'');
+	    		}else{
+	    			url=url.path;
+	    		}
 	    		if(this.model!=='history'){
 	    			var i=url.indexOf('#');
 	    			if(i>-1){
 	    				url=url.substr(i+1,url.length);// hash
 	    			}
 	    		}
+	    		
+	    		this.searchchange=true;
 	    		this.url(url);
 	    		this.searchchange=false;
 	    	}else{
-	    		return url.param;
+	    		return url.params;
 	    	}
 			
 	    },
@@ -76,12 +81,12 @@
 	    	}
 	    	var url=this.location();
 	    	var path=url.path;
-	    	var param=url.param;
+	    	var params=url.params;
 		  	for(var rule in this.routes){
 		  		for(var r in rule.split(',')){
 			  		var match=path.match(this.compile(rule));
 			  		if(match){
-			  			this.routes[rule](this.map(match[0],true),param);
+			  			this.routes[rule](this.map(match[0],true),params);
 			  			return this;
 			  		}
 		  		}
@@ -114,17 +119,17 @@
 				search=url.substr(s+1,url.length);
 				path=url.substr(0,s);
 			}
-			var param={};
+			var params={};
 		    var segs=search.split('&');
 		    for(var i in segs){  
 		        var s=segs[i].split('='); 
 		        if(s[1]){
-		        	param[s[0]]=s[1];
+		        	params[s[0]]=s[1];
 		        }
 		    }  
 			return {  
 					 path:path, 
-					 param:param
+					 params:params
 			};
 		}
 	};
@@ -133,9 +138,9 @@
 	
 	// 接口
 	$.url=Router.url.bind(Router);                     // 变更浏览器URL  
-	$.param=Router.param.bind(Router);                 // 解析浏览器URL,获取查询参数
+	$.params=Router.params.bind(Router);                 // 解析浏览器URL,获取查询参数
 	$.listen=Router.listen.bind(Router);               // 监听指定规则的URL,并回掉对应函数
   	$.loadPage=Router.page.bind(Router);               // 加载页面片段,并触发URL变化
 	$.fn.loadPage=function(url){$.loadPage(this,url);} // 同上
 	
-})(jQuery);
+}(jQuery);
